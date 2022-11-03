@@ -1,5 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from users.models import User
 
 
 class Category(models.Model):
@@ -16,7 +17,7 @@ class Genre(models.Model):
     slug = models.SlugField(unique=True)
 
 
-class Titles(models.Model):
+class Title(models.Model):
     """Основная таблица произведений, к которым пишут отзывы"""
 
     """(определённый фильм, книга или песенка)."""

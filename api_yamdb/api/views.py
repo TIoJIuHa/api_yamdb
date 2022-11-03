@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from reviews.models import Category, Genre, Review, Titles
+from reviews.models import Category, Genre, Review, Title
 
 from .permissions import IsAuthorOrReadOnly
 from .serializers import (
@@ -9,7 +9,7 @@ from .serializers import (
     CommentSerializer,
     GenreSerializer,
     ReviewSerializer,
-    TitlesSerializer,
+    TitleSerializer,
 )
 
 
@@ -45,12 +45,12 @@ class GenreViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
+class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Произведения. Делать запрос может любой,"""
 
     """редактировать и удалять - только админ"""
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
     permission_classes = [
         permissions.IsAdminUser,
     ]
