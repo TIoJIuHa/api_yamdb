@@ -1,7 +1,16 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions, viewsets
-from reviews.models import Category, Genre, Titles
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from reviews.models import Category, Genre, Review, Titles
 
-from .serializers import CategorySerializer, GenreSerializer, TitlesSerializer
+from .permissions import IsAuthorOrReadOnly
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    ReviewSerializer,
+    TitlesSerializer,
+)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -50,3 +59,33 @@ class TitlesViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return (permissions.IsAuthenticatedOrReadOnly,)
         return super().get_permissions()
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly
+
+    def perform_create(self, serializer):
+        title_id = self.kwargs.get("title_id")
+        title = get_object_or_404(Title, id=title_id)
+        serializer.save(user=self.request.user, title=title)
+
+    def get_queryset(self):
+        title_id = self.kwargs.get("title_id")
+        title = get_object_or_404(Title, id=title_id)
+        return title.reviews
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly
+
+    def perform_create(self, serializer):
+        review_id = self.kwargs.get("review_id")
+        review = get_object_or_404(Review, id=review_id)
+        serializer.save(user=self.request.user, review=review)
+
+    def get_queryset(self):
+        review_id = self.kwargs.get("review_id")
+        review = get_object_or_404(Review, id=review_id)
+        return review.comments
