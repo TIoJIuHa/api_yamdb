@@ -29,7 +29,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return username
 
 
-class TokenSerializer(serializers.Serializer):
-    class Meta:
-        model = User
-        fields = ("username", "confirmation_code")
+class VerificationSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    confirmation_code = serializers.CharField(max_length=250)
