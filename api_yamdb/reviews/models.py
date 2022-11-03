@@ -3,7 +3,9 @@ from django.db import models
 
 class Category(models.Model):
     '''Таблица категорий (типы) произведений'''
-    name = models.CharField()
+    name = models.CharField(
+        max_length=30
+    )
     slug = models.SlugField(
         unique=True
     )
@@ -11,7 +13,9 @@ class Category(models.Model):
 
 class Genre(models.Model):
     '''Таблица с категориями жанров'''
-    name = models.CharField()
+    name = models.CharField(
+        max_length=30
+    )
     slug = models.SlugField(
         unique=True
     )
@@ -28,7 +32,9 @@ class Titles(models.Model):
         Genre,
         on_delete=models.CASCADE
     )
-    name = models.CharField()
+    name = models.CharField(
+        max_length=30
+    )
     year = models.DateField(
         'Дата выхода',
     )

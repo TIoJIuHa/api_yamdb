@@ -1,22 +1,43 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
 
 from reviews.models import Titles, Genre, Category
 from .serializers import TitlesSerializer, GenreSerializer, CategorySerializer
 
 
-class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    '''Вьюсет для модели Категории. Читать может любой пользователь'''
+class CategoryViewSet(viewsets.ModelViewSet):
+    '''Вьюсет для модели Категории. Делать запрос может любой пользователь,'''
+    '''редактировать и удалять - только админ'''
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [permissions.IsAdminUser, ]
+
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return (permissions.IsAuthenticatedOrReadOnly, )
+        return super().get_permissions()
 
 
-class GenreViewSet(viewsets.ReadOnlyModelViewSet):
-    '''Вьюсет для модели Жанры. Читать может любой пользователь'''
+class GenreViewSet(viewsets.ModelViewSet):
+    '''Вьюсет для модели Жанры. Делать запрос может любой пользователь,'''
+    '''редактировать и удалять - только админ'''
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = [permissions.IsAdminUser, ]
+
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return (permissions.IsAuthenticatedOrReadOnly, )
+        return super().get_permissions()
 
 
-class TitlesViewSet(viewsets.ReadOnlyModelViewSet):
-    '''Вьюсет для Произведений. Читать может любой пользователь'''
+class TitlesViewSet(viewsets.ModelViewSet):
+    '''Вьюсет для модели Произведения. Делать запрос может любой,'''
+    '''редактировать и удалять - только админ'''
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
+    permission_classes = [permissions.IsAdminUser, ]
+
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return (permissions.IsAuthenticatedOrReadOnly, )
+        return super().get_permissions()
