@@ -1,3 +1,43 @@
 from django.db import models
 
-# Create your models here.
+
+class Category(models.Model):
+    '''Таблица категорий (типы) произведений'''
+    name = models.CharField(
+        max_length=30
+    )
+    slug = models.SlugField(
+        unique=True
+    )
+
+
+class Genre(models.Model):
+    '''Таблица с категориями жанров'''
+    name = models.CharField(
+        max_length=30
+    )
+    slug = models.SlugField(
+        unique=True
+    )
+
+
+class Titles(models.Model):
+    '''Основная таблица произведений, к которым пишут отзывы'''
+    '''(определённый фильм, книга или песенка).'''
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.CASCADE
+    )
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE
+    )
+    name = models.CharField(
+        max_length=30
+    )
+    year = models.DateField(
+        'Дата выхода',
+    )
+    description = models.TextField(
+        max_length=256
+    )
