@@ -22,7 +22,13 @@ class TitleSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = "__all__"
+        fields = (
+            "id",
+            "user",
+            "title",
+            "text",
+            "score",
+            )
         model = Review
         read_field_only = ("title",)
 
