@@ -28,7 +28,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "title",
             "text",
             "score",
-            )
+        )
         model = Review
         read_field_only = ("title",)
 

@@ -3,7 +3,7 @@ from rest_framework import permissions, viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reviews.models import Category, Genre, Review, Title
 
-from .permissions import IsAuthorOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -20,13 +20,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [
-        permissions.IsAdminUser,
+        IsAdminOrReadOnly,
     ]
 
-    def get_permissions(self):
-        if self.action == "retrieve":
-            return (permissions.IsAuthenticatedOrReadOnly,)
-        return super().get_permissions()
+    # def get_permissions(self):
+    #     if self.action == "retrieve":
+    #         return (permissions.IsAuthenticatedOrReadOnly,)
+    #     return super().get_permissions()
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -36,13 +36,13 @@ class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [
-        permissions.IsAdminUser,
+        IsAdminOrReadOnly,
     ]
 
-    def get_permissions(self):
-        if self.action == "retrieve":
-            return (permissions.IsAuthenticatedOrReadOnly,)
-        return super().get_permissions()
+    # def get_permissions(self):
+    #     if self.action == "retrieve":
+    #         return (permissions.IsAuthenticatedOrReadOnly,)
+    #     return super().get_permissions()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -52,19 +52,20 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = [
-        permissions.IsAdminUser,
+        IsAdminOrReadOnly,
     ]
 
-    def get_permissions(self):
-        if self.action == "retrieve":
-            return (permissions.IsAuthenticatedOrReadOnly,)
-        return super().get_permissions()
+    # def get_permissions(self):
+    #     if self.action == "retrieve":
+    #         return (permissions.IsAuthenticatedOrReadOnly,)
+    #     return super().get_permissions()
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели отзыва"""
+
     serializer_class = ReviewSerializer
-    permission_classes = IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly
+    permission_classes = [IsAuthorModeratorAdminOrReadOnly]
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get("title_id")
@@ -79,8 +80,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели комментария"""
+
     serializer_class = CommentSerializer
-    permission_classes = IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly
+    permission_classes = [IsAuthorModeratorAdminOrReadOnly]
 
     def perform_create(self, serializer):
         review_id = self.kwargs.get("review_id")

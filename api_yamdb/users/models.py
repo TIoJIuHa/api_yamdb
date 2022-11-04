@@ -30,7 +30,7 @@ class User(AbstractUser):
     ROLE_CHOICES = [
         ("user", "user"),
         ("moderator", "moderator"),
-        ("moderator", "admin"),
+        ("admin", "admin"),
     ]
 
     role = models.CharField(
