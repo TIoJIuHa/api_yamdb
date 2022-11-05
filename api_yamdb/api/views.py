@@ -1,23 +1,26 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions, viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import viewsets
 from reviews.models import Category, Genre, Review, Title
 from rest_framework.pagination import LimitOffsetPagination
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
-from .permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
+from .permissions import (
+    IsAdminOrReadOnly,
+    IsAuthorModeratorAdminOrReadOnly
+)
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
     GenreSerializer,
     ReviewSerializer,
-    TitleSerializer,
+    TitleGetSerializer,
+    TitlePostSerializer,
 )
+from .viewsets import ListDestroyCreateViewSet
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(ListDestroyCreateViewSet):
     """Вьюсет для модели Категории. Делать запрос может любой пользователь,"""
-
     """редактировать и удалять - только админ"""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -25,16 +28,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
         IsAdminOrReadOnly,
     ]
     pagination_class = LimitOffsetPagination
-
-    # def get_permissions(self):
-    #     if self.action == "retrieve":
-    #         return (permissions.IsAuthenticatedOrReadOnly,)
-    #     return super().get_permissions()
+    filter_backends = (SearchFilter, )
+    search_fields = ('name',)
+    lookup_field = "slug"
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(ListDestroyCreateViewSet):
     """Вьюсет для модели Жанры. Делать запрос может любой пользователь,"""
-
     """редактировать и удалять - только админ"""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
@@ -42,28 +42,25 @@ class GenreViewSet(viewsets.ModelViewSet):
         IsAdminOrReadOnly,
     ]
     pagination_class = LimitOffsetPagination
-
-    # def get_permissions(self):
-    #     if self.action == "retrieve":
-    #         return (permissions.IsAuthenticatedOrReadOnly,)
-    #     return super().get_permissions()
+    filter_backends = (SearchFilter, )
+    search_fields = ('name',)
+    lookup_field = "slug"
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Произведения. Делать запрос может любой,"""
-
     """редактировать и удалять - только админ"""
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
+    serializer_class = TitleGetSerializer
     permission_classes = [
         IsAdminOrReadOnly,
     ]
     pagination_class = LimitOffsetPagination
 
-    # def get_permissions(self):
-    #     if self.action == "retrieve":
-    #         return (permissions.IsAuthenticatedOrReadOnly,)
-    #     return super().get_permissions()
+    def get_serializer_class(self):
+        if self.request.method in 'POST':
+            return TitlePostSerializer
+        return TitleGetSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

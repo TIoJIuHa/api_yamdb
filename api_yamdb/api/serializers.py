@@ -1,23 +1,51 @@
 from rest_framework import serializers
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import (Category,
+                            Comment,
+                            Genre,
+                            Review,
+                            Title,
+                            GenreCategory)
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ("id", "name", "slug")
+        fields = ("name", "slug")
+        lookup_field = "slug"
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = ("id", "name", "slug")
+        fields = ("name", "slug")
+        lookup_field = "slug"
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class TitleGetSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
+
     class Meta:
         model = Title
         fields = ("id", "name", "category", "genre", "description", "year")
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+
+    class Meta:
+        model = Title
+        fields = ("id", "name", "category", "genre", "description", "year")
+
+    def create(self, validated_data):
+        genre = validated_data.pop('genre')
+        title = Title.objects.create(**validated_data)
+
+        for genries in genre:
+            genre_current = Genre.objects.get(**genries)
+            GenreCategory.objects.create(genries=genre_current, title=title)
+        return title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
