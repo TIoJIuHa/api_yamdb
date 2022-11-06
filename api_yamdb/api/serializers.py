@@ -40,10 +40,10 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
     def get_rating(self, obj):
         review_list = get_list_or_404(Review, title=obj)
-        rating_list = []
+        sum = 0
         for review in review_list:
-            rating_list.append(review.score)
-        return rating_list
+            sum += review.score
+        return round(sum / len(review_list))
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
