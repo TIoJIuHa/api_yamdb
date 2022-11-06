@@ -40,7 +40,7 @@ class TitlePostSerializer(serializers.ModelSerializer):
                                          many=True)
     category = serializers.SlugRelatedField(queryset=Category.objects.all(),
                                             slug_field="slug")
-
+    
     class Meta:
         model = Title
         fields = ("id", "name", "category", "genre", "year", "description")
@@ -69,16 +69,28 @@ class TitlePostSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+    score = serializers.IntegerField(
+        min_value=1, max_value=10
+    )
+
     class Meta:
-        fields = (
-            "id",
-            "user",
-            "title",
-            "text",
-            "score",
-        )
         model = Review
-        read_field_only = ("title",)
+        fields = '__all__'
+        read_only_fields = ('title',)
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            if Review.objects.filter(
+                author=self.context['request'].user,
+                title=self.context['view'].kwargs.get('title_id')
+            ).exists():
+                raise serializers.ValidationError(
+                    'Нельзя оставить отзыв на одно произведение дважды'
+                )
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -87,12 +99,6 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = (
-            "id",
-            "author",
-            "review",
-            "text",
-            "created",
-        )
+        fields = "__all__"
         model = Comment
         read_only_fields = ("review",)
