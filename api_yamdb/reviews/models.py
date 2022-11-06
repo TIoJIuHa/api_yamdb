@@ -28,22 +28,18 @@ class Title(models.Model):
 
     """(определённый фильм, книга или песенка)."""
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    genre = models.ManyToManyField(Genre, through='GenreCategory')
+    genre = models.ManyToManyField(Genre, through='GenreTitle')
     name = models.CharField(max_length=30)
-    year = models.DateField(
-        "Дата выхода",
-    )
-    description = models.TextField(max_length=256)
+    year = models.IntegerField()
 
 
-class GenreCategory(models.Model):
+class GenreTitle(models.Model):
     """Вспомогательная таблица для модели Title"""
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.genre} {self.category}'
+        return f'{self.genre}'
 
 
 class Review(models.Model):

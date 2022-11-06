@@ -4,7 +4,7 @@ from reviews.models import (Category,
                             Genre,
                             Review,
                             Title,
-                            GenreCategory)
+                            GenreTitle)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -27,7 +27,7 @@ class TitleGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ("id", "name", "category", "genre", "description", "year")
+        fields = ("id", "name", "category", "genre", "year")
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
@@ -36,7 +36,7 @@ class TitlePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ("id", "name", "category", "genre", "description", "year")
+        fields = ("id", "name", "category", "genre", "year")
 
     def create(self, validated_data):
         genre = validated_data.pop('genre')
@@ -44,7 +44,7 @@ class TitlePostSerializer(serializers.ModelSerializer):
 
         for genries in genre:
             genre_current = Genre.objects.get(**genries)
-            GenreCategory.objects.create(genries=genre_current, title=title)
+            GenreTitle.objects.create(genries=genre_current, title=title)
         return title
 
 
