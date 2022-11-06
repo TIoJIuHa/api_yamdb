@@ -9,6 +9,9 @@ class Category(models.Model):
     name = models.CharField(max_length=30)
     slug = models.SlugField(unique=True)
 
+    def __str__(self):
+        return f'{self.name} {self.slug}'
+
 
 class Genre(models.Model):
     """Таблица с категориями жанров"""
@@ -16,18 +19,31 @@ class Genre(models.Model):
     name = models.CharField(max_length=30)
     slug = models.SlugField(unique=True)
 
+    def __str__(self):
+        return f'{self.name} {self.slug}'
+
 
 class Title(models.Model):
     """Основная таблица произведений, к которым пишут отзывы"""
 
     """(определённый фильм, книга или песенка)."""
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    genre = models.ManyToManyField(Genre, through='GenreCategory')
     name = models.CharField(max_length=30)
     year = models.DateField(
         "Дата выхода",
     )
     description = models.TextField(max_length=256)
+
+
+class GenreCategory(models.Model):
+    """Вспомогательная таблица для модели Title"""
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.genre} {self.category}'
 
 
 class Review(models.Model):
