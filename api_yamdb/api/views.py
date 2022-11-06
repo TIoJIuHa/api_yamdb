@@ -55,10 +55,13 @@ class TitleViewSet(viewsets.ModelViewSet):
     permission_classes = [
         IsAdminOrReadOnly,
     ]
+    filter_backends = (SearchFilter,)
+    #filterset_fields = ("genre",)
+    #search_fields = ("slug",)
     pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
-        if self.request.method in "POST":
+        if self.request.method in ("POST", "PATCH"):
             return TitlePostSerializer
         return TitleGetSerializer
 

@@ -1,3 +1,5 @@
+import datetime as dt
+
 from rest_framework import serializers
 from reviews.models import (Category,
                             Comment,
@@ -22,30 +24,48 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleGetSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True, read_only=True)
+    genre = serializers.SlugRelatedField(read_only=True,
+                                         slug_field="slug",
+                                         many=True)
     category = CategorySerializer(read_only=True)
 
     class Meta:
         model = Title
-        fields = ("id", "name", "category", "genre", "year")
+        fields = ("id", "name", "category", "genre", "year", "description")
 
 
 class TitlePostSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True)
-    category = CategorySerializer()
+    genre = serializers.SlugRelatedField(queryset=Genre.objects.all(),
+                                         slug_field="slug",
+                                         many=True)
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
+                                            slug_field="slug")
 
     class Meta:
         model = Title
-        fields = ("id", "name", "category", "genre", "year")
+        fields = ("id", "name", "category", "genre", "year", "description")
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response["category"] = CategorySerializer(instance.category).data
+        response["genre"] = GenreSerializer(instance.genre, many=True).data
+        return response
 
     def create(self, validated_data):
-        genre = validated_data.pop('genre')
+        genre_slug = validated_data.pop('genre')
         title = Title.objects.create(**validated_data)
 
-        for genries in genre:
-            genre_current = Genre.objects.get(**genries)
-            GenreTitle.objects.create(genries=genre_current, title=title)
+        for genries in genre_slug:
+            genre_current = Genre.objects.get(slug=genries.slug)
+            GenreTitle.objects.create(genre=genre_current, title=title)
         return title
+    
+    def validate_date(self, value):
+        year = dt.date.today().year
+        if value > year:
+            raise serializers.ValidationError(
+                'Год не может быть больше текущего')
+        return value
 
 
 class ReviewSerializer(serializers.ModelSerializer):

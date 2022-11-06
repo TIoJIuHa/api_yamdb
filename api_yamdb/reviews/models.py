@@ -31,6 +31,7 @@ class Title(models.Model):
     genre = models.ManyToManyField(Genre, through='GenreTitle')
     name = models.CharField(max_length=30)
     year = models.IntegerField()
+    description = models.TextField(max_length=250, blank=True)
 
 
 class GenreTitle(models.Model):
