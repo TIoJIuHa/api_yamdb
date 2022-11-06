@@ -56,8 +56,8 @@ class TitleViewSet(viewsets.ModelViewSet):
         IsAdminOrReadOnly,
     ]
     filter_backends = (SearchFilter,)
-    #filterset_fields = ("genre",)
-    #search_fields = ("slug",)
+    # filterset_fields = ("genre",)
+    # search_fields = ("slug",)
     pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
@@ -93,7 +93,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         review = get_object_or_404(
             Review,
             id=self.kwargs.get("review_id"),
-            title=self.kwargs.get("title_id")
+            title=self.kwargs.get("title_id"),
         )
         serializer.save(user=self.request.user, review=review)
 
