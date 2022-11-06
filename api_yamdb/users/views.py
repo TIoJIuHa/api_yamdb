@@ -1,5 +1,6 @@
 from api.permissions import IsAdmin
 from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
@@ -53,10 +54,15 @@ class UserViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def registration_view(request):
     serializer = RegistrationSerializer(data=request.data)
-    if not (serializer.is_valid()):
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     username = request.data.get("username")
     email = request.data.get("email")
+    if not (serializer.is_valid()):
+        try:
+            User.objects.get(username=username, email=email)
+        except ObjectDoesNotExist:
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
     user, created = User.objects.get_or_create(username=username, email=email)
     confirmation_code = default_token_generator.make_token(user)
     send_mail(
