@@ -1,8 +1,10 @@
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
 from reviews.models import Category, Genre, Review, Title
+
 
 from .permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
 from .serializers import (
@@ -10,10 +12,10 @@ from .serializers import (
     CommentSerializer,
     GenreSerializer,
     ReviewSerializer,
-    TitleGetSerializer,
-    TitlePostSerializer,
+    TitleSerializer,
 )
 from .viewsets import ListDestroyCreateViewSet
+from .filters import TitleFilter
 
 
 class CategoryViewSet(ListDestroyCreateViewSet):
@@ -48,27 +50,19 @@ class GenreViewSet(ListDestroyCreateViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Произведения. Делать запрос может любой,"""
-
     """редактировать и удалять - только админ"""
     queryset = Title.objects.all()
-    serializer_class = TitleGetSerializer
+    serializer_class = TitleSerializer
     permission_classes = [
         IsAdminOrReadOnly,
     ]
-    filter_backends = (SearchFilter,)
-    # filterset_fields = ("genre",)
-    # search_fields = ("slug",)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
     pagination_class = LimitOffsetPagination
-
-    def get_serializer_class(self):
-        if self.request.method in ("POST", "PATCH"):
-            return TitlePostSerializer
-        return TitleGetSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели отзыва"""
-
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthorModeratorAdminOrReadOnly]
     pagination_class = LimitOffsetPagination

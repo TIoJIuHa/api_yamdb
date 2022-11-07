@@ -19,34 +19,7 @@ class GenreSerializer(serializers.ModelSerializer):
         lookup_field = "slug"
 
 
-class TitleGetSerializer(serializers.ModelSerializer):
-    genre = serializers.SlugRelatedField(
-        read_only=True, slug_field="slug", many=True
-    )
-    rating = serializers.SerializerMethodField()
-    category = CategorySerializer(read_only=True)
-
-    class Meta:
-        model = Title
-        fields = (
-            "id",
-            "name",
-            "category",
-            "genre",
-            "year",
-            "rating",
-            "description",
-        )
-
-    def get_rating(self, obj):
-        review_list = get_list_or_404(Review, title=obj)
-        sum = 0
-        for review in review_list:
-            sum += review.score
-        return round(sum / len(review_list))
-
-
-class TitlePostSerializer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(), slug_field="slug", many=True
     )
@@ -87,6 +60,21 @@ class TitlePostSerializer(serializers.ModelSerializer):
                 "Год не может быть больше текущего"
             )
         return value
+
+    def get_rating(self, obj):
+        review_list = get_list_or_404(Review, title=obj)
+        sum = 0
+        for review in review_list:
+            sum += review.score
+        return round(sum / len(review_list))
+
+    # def get_rating(self, obj):
+    #    review_object = Review.objects.filter(
+    #                                          title=obj.id).aggregate(Avg('score'))
+    #    avg_score = review_object['score__avg']
+    #    if avg_score is None:
+    #        return 0
+    #    return float('{:.1f}').format(avg_score)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
