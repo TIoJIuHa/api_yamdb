@@ -6,7 +6,7 @@ from users.models import User
 class Category(models.Model):
     """Таблица категорий (типы) произведений"""
 
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=60)
     slug = models.SlugField(unique=True)
 
     def __str__(self):
