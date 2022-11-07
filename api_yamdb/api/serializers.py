@@ -1,6 +1,5 @@
 import datetime as dt
 
-from django.shortcuts import get_list_or_404
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 
@@ -32,6 +31,7 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
+            "rating",
             "category",
             "genre",
             "year",
@@ -47,10 +47,10 @@ class TitleSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         genre_slug = validated_data.pop("genre")
         title = Title.objects.create(**validated_data)
-
         for genries in genre_slug:
             genre_current = Genre.objects.get(slug=genries.slug)
             GenreTitle.objects.create(genre=genre_current, title=title)
+        title.rating = 0
         return title
 
     def validate_date(self, value):
@@ -60,21 +60,6 @@ class TitleSerializer(serializers.ModelSerializer):
                 "Год не может быть больше текущего"
             )
         return value
-
-    def get_rating(self, obj):
-        review_list = get_list_or_404(Review, title=obj)
-        sum = 0
-        for review in review_list:
-            sum += review.score
-        return round(sum / len(review_list))
-
-    # def get_rating(self, obj):
-    #    review_object = Review.objects.filter(
-    #                                          title=obj.id).aggregate(Avg('score'))
-    #    avg_score = review_object['score__avg']
-    #    if avg_score is None:
-    #        return 0
-    #    return float('{:.1f}').format(avg_score)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
