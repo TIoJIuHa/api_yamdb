@@ -22,10 +22,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework.authtoken",
     "django_filters",
+
     "users",
     "reviews",
     "api",
@@ -112,6 +114,8 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 
 AUTH_USER_MODEL = "users.User"
 
+# Authentication, pagination, permissions
+
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
@@ -127,6 +131,8 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# Mail service emulation
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")

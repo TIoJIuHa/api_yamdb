@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
-from rest_framework.pagination import LimitOffsetPagination
 from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
@@ -27,7 +26,6 @@ class CategoryViewSet(ListDestroyCreateViewSet):
     permission_classes = [
         IsAdminOrReadOnly,
     ]
-    pagination_class = LimitOffsetPagination
     filter_backends = (SearchFilter,)
     search_fields = ("name",)
     lookup_field = "slug"
@@ -42,7 +40,6 @@ class GenreViewSet(ListDestroyCreateViewSet):
     permission_classes = [
         IsAdminOrReadOnly,
     ]
-    pagination_class = LimitOffsetPagination
     filter_backends = (SearchFilter,)
     search_fields = ("name",)
     lookup_field = "slug"
@@ -59,7 +56,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     ]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
-    pagination_class = LimitOffsetPagination
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -67,7 +63,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthorModeratorAdminOrReadOnly]
-    pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
@@ -75,7 +70,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         int_rating = Review.objects.filter(title=title).aggregate(Avg("score"))
         title.rating = int_rating["score__avg"]
         title.save(update_fields=["rating"])
-        print("! REVIEW CREATE", title.rating)
 
     def perform_update(self, serializer):
         serializer.save()
@@ -83,7 +77,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         int_rating = Review.objects.filter(title=title).aggregate(Avg("score"))
         title.rating = int_rating["score__avg"]
         title.save(update_fields=["rating"])
-        print("! REVIEW UPDATE", title.rating)
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
@@ -95,7 +88,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     serializer_class = CommentSerializer
     permission_classes = [IsAuthorModeratorAdminOrReadOnly]
-    pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
         review = get_object_or_404(
