@@ -25,6 +25,7 @@ class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         queryset=Category.objects.all(), slug_field="slug"
     )
+    rating = serializers.IntegerField(required=False)
 
     class Meta:
         model = Title
@@ -50,7 +51,6 @@ class TitleSerializer(serializers.ModelSerializer):
         for genries in genre_slug:
             genre_current = Genre.objects.get(slug=genries.slug)
             GenreTitle.objects.create(genre=genre_current, title=title)
-        title.rating = 0
         return title
 
     def validate_date(self, value):

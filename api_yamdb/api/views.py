@@ -6,7 +6,11 @@ from rest_framework.filters import SearchFilter
 from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
-from .permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
+from .permissions import (
+    IsAdminOrReadOnly,
+    IsAuthorOrReadOnly,
+    IsModeratorOrReadOnly,
+)
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -14,7 +18,7 @@ from .serializers import (
     ReviewSerializer,
     TitleSerializer,
 )
-from .viewsets import ListDestroyCreateViewSet
+from .mixins import ListDestroyCreateViewSet
 
 
 class CategoryViewSet(ListDestroyCreateViewSet):
@@ -49,7 +53,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Произведения. Делать запрос может любой,"""
 
     """редактировать и удалять - только админ"""
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = [
         IsAdminOrReadOnly,
@@ -62,21 +66,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели отзыва"""
 
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthorModeratorAdminOrReadOnly]
+    permission_classes = [
+        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly
+    ]
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
         serializer.save(author=self.request.user, title=title)
-        int_rating = Review.objects.filter(title=title).aggregate(Avg("score"))
-        title.rating = int_rating["score__avg"]
-        title.save(update_fields=["rating"])
-
-    def perform_update(self, serializer):
-        serializer.save()
-        title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
-        int_rating = Review.objects.filter(title=title).aggregate(Avg("score"))
-        title.rating = int_rating["score__avg"]
-        title.save(update_fields=["rating"])
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
@@ -87,7 +83,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели комментария"""
 
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthorModeratorAdminOrReadOnly]
+    permission_classes = [
+        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly
+    ]
 
     def perform_create(self, serializer):
         review = get_object_or_404(
