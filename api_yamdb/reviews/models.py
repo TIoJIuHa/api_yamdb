@@ -4,7 +4,7 @@ from users.models import User
 
 
 class Category(models.Model):
-    """Таблица категорий (типы) произведений"""
+    """Категории (типы) произведений"""
 
     name = models.CharField(max_length=60)
     slug = models.SlugField(unique=True)
@@ -14,7 +14,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    """Таблица с категориями жанров"""
+    """Жанры произведений"""
 
     name = models.CharField(max_length=30)
     slug = models.SlugField(unique=True)
@@ -24,7 +24,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    """Основная таблица произведений, к которым пишут отзывы"""
+    """Произведения, к которым пишут отзывы"""
 
     """(определённый фильм, книга или песенка)."""
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -36,7 +36,7 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
-    """Вспомогательная таблица для модели Title"""
+    """Вспомогательный класс для модели Title"""
 
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
@@ -46,7 +46,7 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
-    """Таблица с отзывами к произведениям"""
+    """Отзывы к произведениям"""
 
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="reviews"
@@ -78,7 +78,7 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
-    """Таблица с комментариями"""
+    """Комментарии к отзывам"""
 
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="comments"

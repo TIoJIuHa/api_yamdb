@@ -3,10 +3,15 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
-from .permissions import IsAdminOrReadOnly, IsAuthorModeratorAdminOrReadOnly
+from .permissions import (
+    IsAdminOrReadOnly,
+    IsAuthorOrReadOnly,
+    IsModeratorOrReadOnly,
+)
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -62,7 +67,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели отзыва"""
 
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthorModeratorAdminOrReadOnly]
+    permission_classes = [
+        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly
+    ]
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
@@ -87,7 +94,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели комментария"""
 
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthorModeratorAdminOrReadOnly]
+    permission_classes = [
+        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly
+    ]
 
     def perform_create(self, serializer):
         review = get_object_or_404(
