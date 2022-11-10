@@ -17,6 +17,7 @@ from .serializers import (
     GenreSerializer,
     ReviewSerializer,
     TitleSerializer,
+    TitlePostSerialzier
 )
 from .mixins import ListDestroyCreateViewSet
 
@@ -60,6 +61,11 @@ class TitleViewSet(viewsets.ModelViewSet):
     ]
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return TitlePostSerialzier
+        return TitleSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
