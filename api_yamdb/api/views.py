@@ -6,6 +6,7 @@ from rest_framework.filters import SearchFilter
 from reviews.models import Category, Genre, Review, Title
 
 from .filters import TitleFilter
+from .mixins import ListDestroyCreateViewSet
 from .permissions import (
     IsAdminOrReadOnly,
     IsAuthorOrReadOnly,
@@ -17,58 +18,67 @@ from .serializers import (
     GenreSerializer,
     ReviewSerializer,
     TitleSerializer,
+    TitlePostSerialzier
 )
-from .mixins import ListDestroyCreateViewSet
 
 
 class CategoryViewSet(ListDestroyCreateViewSet):
-    """Вьюсет для модели Категории. Делать запрос может любой пользователь,"""
+    """
+    Вьюсет для модели Категории.
+    Делать запрос может любой, редактировать и удалять - только админ.
+    """
 
-    """редактировать и удалять - только админ"""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [
-        IsAdminOrReadOnly,
-    ]
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ("name",)
     lookup_field = "slug"
 
 
 class GenreViewSet(ListDestroyCreateViewSet):
-    """Вьюсет для модели Жанры. Делать запрос может любой пользователь,"""
+    """
+    Вьюсет для модели Жанры.
+    Делать запрос может любой, редактировать и удалять - только админ
+    """
 
-    """редактировать и удалять - только админ"""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = [
-        IsAdminOrReadOnly,
-    ]
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (SearchFilter,)
     search_fields = ("name",)
     lookup_field = "slug"
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """Вьюсет для модели Произведения. Делать запрос может любой,"""
+    """
+    Вьюсет для модели Произведения.
+    Делать запрос может любой, редактировать и удалять - только админ.
+    """
 
-    """редактировать и удалять - только админ"""
-    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+    queryset = Title.objects.annotate(rating=Avg("reviews__score"))
     serializer_class = TitleSerializer
-    permission_classes = [
-        IsAdminOrReadOnly,
-    ]
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return TitlePostSerialzier
+        return TitleSerializer
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """Вьюсет для модели отзыва"""
+    """
+    Вьюсет для модели отзыва.
+    Делать запрос может любой, добавлять только аутентифицированный.
+    Редактировать и удалять только автор, модератор или админ.
+    """
 
     serializer_class = ReviewSerializer
-    permission_classes = [
-        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly
-    ]
+    permission_classes = (
+        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly,
+    )
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs.get("title_id"))
@@ -80,12 +90,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """Вьюсет для модели комментария"""
+    """
+    Вьюсет для модели комментария.
+    Делать запрос может любой, добавлять только аутентифицированный.
+    Редактировать и удалять только автор, модератор или админ.
+    """
 
     serializer_class = CommentSerializer
-    permission_classes = [
-        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly
-    ]
+    permission_classes = (
+        IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly,
+    )
 
     def perform_create(self, serializer):
         review = get_object_or_404(

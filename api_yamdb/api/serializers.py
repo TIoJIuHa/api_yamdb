@@ -1,7 +1,7 @@
 import datetime as dt
 
 from rest_framework import serializers
-from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -19,39 +19,47 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    genre = serializers.SlugRelatedField(
-        queryset=Genre.objects.all(), slug_field="slug", many=True
-    )
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
+    rating = serializers.IntegerField(default=0)
+
+    class Meta:
+        fields = '__all__'
+        model = Title
+        read_only_fields = (
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genre',
+            'category',
+        )
+
+
+class TitlePostSerialzier(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
-        queryset=Category.objects.all(), slug_field="slug"
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
     )
     rating = serializers.IntegerField(required=False)
 
     class Meta:
-        model = Title
         fields = (
-            "id",
-            "name",
-            "rating",
-            "category",
-            "genre",
-            "year",
-            "description",
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genre',
+            'category',
         )
-
-    def to_representation(self, instance):
-        response = super().to_representation(instance)
-        response["category"] = CategorySerializer(instance.category).data
-        response["genre"] = GenreSerializer(instance.genre, many=True).data
-        return response
-
-    def create(self, validated_data):
-        genre_slug = validated_data.pop("genre")
-        title = Title.objects.create(**validated_data)
-        for genries in genre_slug:
-            genre_current = Genre.objects.get(slug=genries.slug)
-            GenreTitle.objects.create(genre=genre_current, title=title)
-        return title
+        model = Title
 
     def validate_date(self, value):
         year = dt.date.today().year
