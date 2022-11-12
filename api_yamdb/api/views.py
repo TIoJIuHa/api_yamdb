@@ -80,16 +80,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
         IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly,
     )
 
-    def get_review(self):
+    def get_title(self):
         title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
         return title
 
     def perform_create(self, serializer):
-        title = self.get_review()
+        title = self.get_title()
         serializer.save(author=self.request.user, title=title)
 
     def get_queryset(self):
-        title = self.get_review()
+        title = self.get_title()
         return title.reviews.all()
 
 
@@ -105,7 +105,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         IsAuthorOrReadOnly | IsModeratorOrReadOnly | IsAdminOrReadOnly,
     )
 
-    def get_comment(self):
+    def get_review(self):
         review = get_object_or_404(
             Review,
             id=self.kwargs.get("review_id"),
@@ -113,9 +113,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         return review
 
     def perform_create(self, serializer):
-        review = self.get_comment()
+        review = self.get_review()
         serializer.save(author=self.request.user, review=review)
 
     def get_queryset(self):
-        review = self.get_comment()
+        review = self.get_review()
         return review.comments.all()
