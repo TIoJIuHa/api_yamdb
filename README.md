@@ -1,9 +1,9 @@
 # Групповой проект - API_YAMDB
 
 **Разработчики:**
-- [Елистратова Полина (тимлид, разработка ресурсов Auth и Users)](https://github.com/TIoJIuHa)
-- [Саидов Ратмир (разработка ресурсов Categories, Genres и Titles)](https://github.com/RatmirSaidov)
-- [Шапченко Дмитрий (разработка ресурсов Review и Comments)](https://github.com/dltt1)
+- [Елистратова Полина](https://github.com/TIoJIuHa) (тимлид, разработка ресурсов Auth и Users)
+- [Саидов Ратмир](https://github.com/RatmirSaidov) (разработка ресурсов Categories, Genres и Titles)
+- [Шапченко Дмитрий](https://github.com/dltt1) (разработка ресурсов Review и Comments)
 
 ### Стек технологий:
 
